@@ -32,7 +32,8 @@ with st.sidebar:
     generate_btn = st.button("🚀 Generate Full Pack", use_container_width=True)
 
 # ------------------ MAIN ------------------
-if generate_btn and subject and topic:
+if (generate_btn or st.session_state.get("generated")) and subject and topic:
+    st.session_state.generated = True
 
     # 🔄 Loading Animation
     progress = st.progress(0)
@@ -64,47 +65,33 @@ if generate_btn and subject and topic:
     # ------------------ QUIZ GAME ------------------
     with tab2:
         st.subheader(f"🎮 Level {st.session_state.level} Quiz")
-        st.info("⏱ Select answers and click SUBMIT")
+
+        # 🎯 Instruction (NEW)
+        st.info("🎯 Get all answers correct to unlock GOLD badge + certificate + balloons")
+
+        score = 0
 
         # LEVEL 1 QUESTIONS
         if st.session_state.level == 1:
-            q1 = st.radio(
-                f"Q1: What is {topic}?",
-                [f"A concept in {subject}", "Not related", "Random idea"],
-                key="q1"
-            )
+            q1 = st.radio(f"Q1: What is {topic}?",
+                          [f"A concept in {subject}", "Not related", "Random idea"], key="q1")
 
-            q2 = st.radio(
-                f"Q2: Why is {topic} important?",
-                ["Improves efficiency", "No use", "Only theory"],
-                key="q2"
-            )
+            q2 = st.radio(f"Q2: Why is {topic} important?",
+                          ["Improves efficiency", "No use", "Only theory"], key="q2")
 
-            q3 = st.radio(
-                f"Q3: Where is {topic} used?",
-                ["Real-world applications", "Nowhere", "Only exams"],
-                key="q3"
-            )
+            q3 = st.radio(f"Q3: Where is {topic} used?",
+                          ["Real-world applications", "Nowhere", "Only exams"], key="q3")
 
         # LEVEL 2 QUESTIONS
         else:
-            q1 = st.radio(
-                f"Q1: Advanced application of {topic}?",
-                ["Scalable systems", "Not useful", "Random"],
-                key="q1"
-            )
+            q1 = st.radio(f"Q1: Advanced application of {topic}?",
+                          ["Scalable systems", "Not useful", "Random"], key="q1")
 
-            q2 = st.radio(
-                f"Q2: Optimization improves?",
-                ["Performance", "Nothing", "Complexity"],
-                key="q2"
-            )
+            q2 = st.radio(f"Q2: Optimization improves?",
+                          ["Performance", "Nothing", "Complexity"], key="q2")
 
-            q3 = st.radio(
-                f"Q3: Used in?",
-                ["Industry systems", "Nowhere", "Old tech"],
-                key="q3"
-            )
+            q3 = st.radio(f"Q3: Used in?",
+                          ["Industry systems", "Nowhere", "Old tech"], key="q3")
 
         # ------------------ SUBMIT ------------------
         if st.button("🚀 Submit Quiz"):
@@ -133,10 +120,23 @@ if generate_btn and subject and topic:
             st.progress(score / 3)
             st.markdown(f"## 🎯 Score: {score}/3")
 
-            # BADGE SYSTEM
+            # ✅ Submission confirmation (NEW)
+            st.success("✅ Quiz Submitted Successfully!")
+
+            # BADGE SYSTEM + FIXES
             if score == 3:
                 st.balloons()
                 st.success("🏆 GOLD BADGE - Academic Master")
+
+                # 📜 CERTIFICATE (NEW)
+                certificate = f"""
+Certificate of Achievement
+
+This certifies that {name}
+has successfully completed the quiz on {topic}
+with excellent performance.
+"""
+                st.download_button("📜 Download Certificate", certificate, file_name="certificate.txt")
 
                 # LEVEL UNLOCK
                 if st.session_state.level == 1:
@@ -166,11 +166,7 @@ if generate_btn and subject and topic:
         st.subheader("🏆 Leaderboard")
 
         if st.session_state.leaderboard:
-            sorted_board = sorted(
-                st.session_state.leaderboard,
-                key=lambda x: x[1],
-                reverse=True
-            )
+            sorted_board = sorted(st.session_state.leaderboard, key=lambda x: x[1], reverse=True)
 
             for i, (player, sc) in enumerate(sorted_board, 1):
                 st.write(f"{i}. {player} - {sc} points")
@@ -178,4 +174,4 @@ if generate_btn and subject and topic:
             st.info("No scores yet. Play quiz!")
 
 else:
-    st.info("Enter details and click Generate 🚀")
+    st.warning("⚠️ Please enter Name, Subject, Topic and click 'Generate Full Pack'")
